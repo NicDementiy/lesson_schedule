@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Розклад уроків</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap" rel="stylesheet">
+
+<style>
+:root {
+    --bg: #000000;
+    --card-bg: rgba(255, 255, 255, 0.03);
+    --border: rgba(255, 255, 255, 0.08);
+    --accent: #ffffff;
+    --text-dim: #666;
+    --radius: 24px;
+}
+
+body {
+    background-color: var(--bg);
+    color: #fff;
+    font-family: 'Inter', sans-serif;
+    margin: 0;
+    display: flex;
+    /* Оці три рядки фіксують центрування */
+    justify-content: center;
+    align-items: center; 
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+.spotlight {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: radial-gradient(circle at var(--x, 50%) var(--y, 50%), rgba(255,255,255,0.05) 0%, rgba(0,0,0,0) 50%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+body::after {
+    content: "";
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: url('https://grainy-gradients.vercel.app/noise.svg');
+    opacity: 0.15;
+    pointer-events: none;
+    z-index: 1;
+    filter: contrast(150%) brightness(100%);
+}
+
+#login, #main {
+    position: relative;
+    z-index: 10;
+    width: 100%;
+    max-width: 1100px;
+    padding: 20px;
+    box-sizing: border-box; /* Щоб падінги не роздували блок */
+}
+
+h1 {
+    font-size: clamp(2.5rem, 8vw, 4.5rem);
+    font-weight: 900;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: -3px;
+    margin-bottom: 10px;
+    background: linear-gradient(to bottom, #fff 40%, #222 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+#login {
+    /* Прибрав margin-top, бо align-items: center зробить все за нас */
+    max-width: 450px;
+    background: var(--card-bg);
+    backdrop-filter: blur(30px);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 60px 40px;
+    text-align: center;
+    box-shadow: 0 40px 100px rgba(0,0,0,0.5);
+    margin: 0 auto; /* Центрування по горизонталі */
+}
+
+h2 {
+    font-weight: 300;
+    letter-spacing: 5px;
+    color: var(--text-dim);
+    margin-bottom: 30px;
+}
+
+input {
+    width: 100%;
+    padding: 18px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    color: #fff;
+    font-size: 1rem;
+    outline: none;
+    transition: 0.3s;
+    margin-bottom: 25px;
+    box-sizing: border-box;
+    text-align: center;
+}
+
+input:focus {
+    background: rgba(255,255,255,0.1);
+    border-color: #fff;
+}
+
+button {
+    width: 100%;
+    padding: 18px;
+    background: #fff;
+    color: #000;
+    border: none;
+    border-radius: 14px;
+    font-weight: 700;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 30px rgba(255,255,255,0.2);
+}
+
+#timer {
+    display: block;
+    margin: 0 auto 40px auto;
+    padding: 10px 30px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    font-weight: 300;
+    color: #888;
+    text-align: center;
+    width: fit-content;
+}
+
+#timer b { color: #fff; font-weight: 700; }
+
+.container {
+    width: 100%;
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 12px;
+}
+
+th {
+    padding: 25px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    color: var(--text-dim);
+}
+
+td {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 25px 15px;
+    text-align: center;
+    transition: 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.lesson {
+    cursor: pointer;
+    font-weight: 400;
+}
+
+.lesson:hover {
+    background: #ffffff !important;
+    color: #000000 !important;
+    transform: translateY(-8px) scale(1.03);
+    box-shadow: 0 20px 40px rgba(255,255,255,0.15);
+}
+
+.lesson-num {
+    background: transparent !important;
+    border: none !important;
+    color: #333;
+    font-weight: 900;
+    font-size: 1.8rem;
+}
+
+#main { display: none; opacity: 0; transition: 1s; }
+
+@media (max-width: 768px) {
+    table { border-spacing: 5px; }
+    td { padding: 15px 5px; font-size: 0.8rem; }
+    #login { padding: 40px 20px; } /* Трохи компактніше для телефонів */
+}
+</style>
+</head>
+<body>
+
+<div class="spotlight"></div>
+
+<div id="login">
+    <h2>СИСТЕМА</h2>
+    <input type="password" id="pass" placeholder="КОД ДОСТУПУ">
+    <button onclick="login()">Увійти</button>
+</div>
+
+<div id="main">
+    <h1>РОЗКЛАД</h1>
+    <div id="timer">Ініціалізація...</div>
+
+    <div class="container">
+        <table>
+            <thead>
+                <tr>
+                    <th>№</th>
+                    <th>ПН</th>
+                    <th>ВТ</th>
+                    <th>СР</th>
+                    <th>ЧТ</th>
+                    <th>ПТ</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="lesson-num">1</td>
+                    <td class="lesson" onclick="openLesson('Інформатика')">Інформатика</td>
+                    <td class="lesson" onclick="openLesson('Інформатика')">Інформатика</td>
+                    <td class="lesson" onclick="openLesson('Алгебра')">Алгебра</td>
+                    <td class="lesson" onclick="openLesson('Укр. мова')">Укр. мова</td>
+                    <td class="lesson" onclick="openLesson('Англ. мова')">Англ. мова</td>
+                </tr>
+                <tr><td class="lesson-num">2</td><td class="lesson" onclick="openLesson('Англ. мова')">Англ. мова</td><td class="lesson" onclick="openLesson('Укр. мова')">Укр. мова</td><td class="lesson" onclick="openLesson('Геометрія')">Геометрія</td><td class="lesson" onclick="openLesson('Укр. літ')">Укр. літ</td><td class="lesson" onclick="openLesson('Всес. істор.')">Всес. істор.</td></tr>
+                <tr><td class="lesson-num">3</td><td class="lesson" onclick="openLesson('Біологія')">Біологія</td><td class="lesson" onclick="openLesson('Географія')">Географія</td><td class="lesson" onclick="openLesson('Технології')">Технології</td><td class="lesson" onclick="openLesson('Фізкультура')">Фізкультура</td><td class="lesson" onclick="openLesson('Укр. мова')">Укр. мова</td></tr>
+                <tr><td class="lesson-num">4</td><td class="lesson" onclick="openLesson('Алгебра')">Алгебра</td><td class="lesson" onclick="openLesson('Англ. мова')">Англ. мова</td><td class="lesson" onclick="openLesson('Хімія')">Хімія</td><td class="lesson" onclick="openLesson('Алгебра')">Алгебра</td><td class="lesson" onclick="openLesson('Фізкультура')">Фізкультура</td></tr>
+                <tr><td class="lesson-num">5</td><td class="lesson" onclick="openLesson('Укр. літ')">Укр. літ</td><td class="lesson" onclick="openLesson('Істор. Укр.')">Істор. Укр.</td><td class="lesson" onclick="openLesson('Фізика')">Фізика</td><td class="lesson" onclick="openLesson('Англ. мова')">Англ. мова</td><td class="lesson" onclick="openLesson('Істор. Укр.')">Істор. Укр.</td></tr>
+                <tr><td class="lesson-num">6</td><td class="lesson" onclick="openLesson('Геометрія')">Геометрія</td><td class="lesson" onclick="openLesson('Музичне мистецтво')">Музика</td><td class="lesson" onclick="openLesson('Здор. безпека')">Здоров'я</td><td class="lesson" onclick="openLesson('Зарубіжна літ.')">Зарубіжна</td><td class="lesson" onclick="openLesson('Фізика')">Фізика</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+const spotlight = document.querySelector('.spotlight');
+window.addEventListener('mousemove', e => {
+    spotlight.style.setProperty('--x', `${e.clientX}px`);
+    spotlight.style.setProperty('--y', `${e.clientY}px`);
+});
+
+let password = "5544332211";
+
+function login() {
+    if(document.getElementById("pass").value === password) {
+        document.getElementById("login").style.display = "none";
+        const main = document.getElementById("main");
+        main.style.display = "block";
+        // Важливо: при розкладі на весь екран міняємо центрування body
+        document.body.style.alignItems = "flex-start";
+        document.body.style.paddingTop = "40px";
+        
+        setTimeout(() => main.style.opacity = "1", 50);
+        timer();
+        setInterval(timer, 1000);
+    } else {
+        alert("ДОСТУП ЗАБОРОНЕНО");
+    }
+}
+
+document.getElementById("pass").addEventListener("keyup", (e) => {
+    if (e.key === "Enter") login();
+});
+
+let links = {
+    "Здор. безпека":"https://zoom.us/j/7845869308?pwd=MTEx",
+    "Біологія":"https://zoom.us/j/7845869308?pwd=MTEx",
+    "Зарубіжна літ.":"https://zoom.us/j/73631678265?pwd=MDAwMA==",
+    "Укр. літ":"https://zoom.us/j/5397327240?pwd=MjUwNA==",
+    "Фізкультура":"https://zoom.us/j/7407866981?pwd=MTEyMjMzNDQ=",
+    "Технології":"https://zoom.us/j/4641339713?pwd=MTEx",
+    "Англ. мова":"https://zoom.us/j/72995988336?pwd=MDAwMDA=",
+    "Фізика":"https://zoom.us/j/86574291592?pwd=MTExMQ==",
+    "Істор. Укр.":"https://zoom.us/j/8180665641?pwd=MTk5MQ==",
+    "Всес. істор.":"https://zoom.us/j/8180665641?pwd=MTk5MQ==",
+    "Алгебра":"https://zoom.us/j/86283593232?pwd=MTIzNDU=",
+    "Геометрія":"https://zoom.us/j/86283593232?pwd=MTIzNDU=",
+    "Укр. мова":"https://zoom.us/j/5397327240?pwd=MjUwNA==",
+    "Інформатика":"https://zoom.us/j/6031106839?pwd=MjIy",
+    "Географія":"https://zoom.us/j/82942148954?pwd=NjY2",
+    "Хімія":"https://zoom.us/j/77765831914?pwd=NjY2",
+    "Музичне мистецтво":"https://zoom.us/j/5137856702?pwd=MTEx",
+};
+
+function openLesson(name) {
+    if(links[name]) window.open(links[name]);
+    else alert("Посилання не знайдено");
+}
+
+let times = [
+    [8,30, 9,15], [9,25, 10,10], [10,20, 11,5],
+    [11,25, 12,10], [12,20, 13,5], [13,15, 14,0], [14,10, 14,55]
+];
+
+function timer() {
+    let now = new Date();
+    let currentTotalMinutes = now.getHours() * 60 + now.getMinutes();
+    let next = null;
+
+    for(let t of times) {
+        let start = t[0] * 60 + t[1];
+        if(currentTotalMinutes < start) {
+            next = start - currentTotalMinutes;
+            break;
+        }
+    }
+
+    if(next) {
+        let m = Math.floor(next);
+        let s = 59 - now.getSeconds();
+        document.getElementById("timer").innerHTML = `НАСТУПНИЙ УРОК ЧЕРЕЗ: <b>${m}хв ${s < 10 ? '0'+s : s}с</b>`;
+    } else {
+        document.getElementById("timer").innerText = "УРОКИ ЗАКІНЧЕНО 😎";
+    }
+}
+</script>
+</body>
+</html>
