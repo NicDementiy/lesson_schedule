@@ -217,7 +217,7 @@ button:active { transform: translateY(-1px) scale(0.99); }
 #main {
     display: none;
     flex-direction: column;
-    align-items: center; /* Центруємо весь вміст */
+    align-items: center;
     opacity: 0;
     max-width: 1220px;
     margin: 0 auto;
@@ -277,16 +277,17 @@ button:active { transform: translateY(-1px) scale(0.99); }
     text-transform: uppercase;
 }
 
+/* Контейнер таблицы с плавной горизонтальной прокруткой для телефонов */
 .container {
     width: 100%;
     max-width: 1000px;
     overflow-x: auto;
-    padding: 4px;
-    display: flex;
-    justify-content: center; /* Центруємо таблицю всередині контейнера */
+    padding: 4px 12px;
+    margin: 0 auto;
+    -webkit-overflow-scrolling: touch;
 }
 
-.container::-webkit-scrollbar { height: 10px; }
+.container::-webkit-scrollbar { height: 8px; }
 .container::-webkit-scrollbar-track { background: rgba(255,255,255,0.04); border-radius: 999px; }
 .container::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.25); border-radius: 999px; }
 
@@ -295,6 +296,7 @@ table {
     min-width: 850px;
     border-collapse: separate;
     border-spacing: 12px;
+    margin: 0 auto;
 }
 
 th {
@@ -571,7 +573,7 @@ function zoomURL(id, pass) {
     return `https://zoom.us/j/${cleanId}?pwd=${btoa(pass)}`;
 }
 
-/* Окремі бази посилань для кожного класу, щоб уникнути конфліктів при однакових предметах (наприклад, Інформатика) */
+/* Окремі бази посилань для кожного класу */
 const classLinks = {
     5: {
         "Українська мова": zoomURL("539 732 7240", "2504"),
@@ -595,7 +597,7 @@ const classLinks = {
         "Зарубіжна література": zoomURL("736 3167 8265", "0000"),
         "Укр. літ": zoomURL("539 732 7240", "2504"),
         "Фізкультура": zoomURL("740 786 6981", "11223344"),
-        "Фізра": zoomURL("740 786 6981", "11223344"), // те ж саме що й Фізкультура
+        "Фізра": zoomURL("740 786 6981", "11223344"),
         "Технології": zoomURL("827 3794 5206", "111"),
         "Англ. мова": zoomURL("729 9598 8336", "00000"), // Дьякова Л.В.
         "Фізика": zoomURL("865 7429 1592", "1111"),
@@ -622,7 +624,7 @@ function login() {
         loginBox.style.display = "none";
 
         const main = document.getElementById("main");
-        main.style.display = "flex"; // Використовуємо flex для відцентрування
+        main.style.display = "flex";
         document.body.style.alignItems = "flex-start";
 
         setTimeout(() => main.style.opacity = "1", 50);
@@ -700,7 +702,6 @@ function renderSchedule(classNumber) {
 }
 
 function openLesson(name) {
-    // Беремо посилання залежно від вибраного зараз класу
     const url = classLinks[currentClass][name];
 
     if (url) {
